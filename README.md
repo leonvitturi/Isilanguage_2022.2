@@ -4,7 +4,7 @@
 - Bruno Sanches -------------- RA:
 - Enzo Shiraishi --------------- RA:
 - Gustavo Fonseca ------------ RA:
-- Leonardo Vitturi Ribeiro ----- RA: 11201722342
+- Leonardo Vitturi Ribeiro ---- RA: 11201722342
 - Paloma Santana ------------- RA:
 
 ## Checklist
