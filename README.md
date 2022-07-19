@@ -7,6 +7,11 @@
 - Leonardo Vitturi Ribeiro   RA: 11201722342
 - Paloma Santana             RA:
 
+| Nome           | RA |
+|----------------|---------------|
+| Leonardo Vitturi | 11201722342 |  
+
+
 ## Checklist
 
 ### Requisitos Mínimos
