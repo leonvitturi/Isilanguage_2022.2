@@ -1,7 +1,7 @@
 # Isilanguage_2022.2
 
 ## Integrantes do Projeto
-- Bruno Sanches --------------- RA:
+- Bruno Sanches -------------- RA:
 - Enzo Shiraishi ---------------- RA:
 - Gustavo Fonseca ------------ RA:
 - Leonardo Vitturi Ribeiro ---- RA: 11201722342
