@@ -6,7 +6,7 @@
 | ----------- | ----------- |
 | Bruno Sanches | XXXXXXXXXXX |
 | Enzo Shiraishi | XXXXXXXXXXX |
-| Gustavo Fonseca | XXXXXXXXXXX |
+| Gustavo Fonseca | 11201921803 |
 | Leonardo Vitturi Ribeiro | 11201722342 |
 | Paloma Santana | XXXXXXXXXXX |
 
