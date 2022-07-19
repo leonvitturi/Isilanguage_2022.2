@@ -1,16 +1,14 @@
 # Isilanguage_2022.2
 
 ## Integrantes do Projeto
-- Bruno Sanches RA:
-- Enzo Shiraishi RA:
-- Gustavo Fonseca  RA:
-- Leonardo Vitturi Ribeiro  RA: 11201722342
-- Paloma Santana RA:
 
-| Syntax | Description |
+| NOME | RA |
 | ----------- | ----------- |
-| Header | Title |
-| Paragraph | Text |
+| Bruno Sanches | XXXXXXXXXXX |
+| Enzo Shiraishi | XXXXXXXXXXX |
+| Gustavo Fonseca | XXXXXXXXXXX |
+| Leonardo Vitturi Ribeiro | 11201722342 |
+| Paloma Santana | XXXXXXXXXXX |
 
 
 ## Checklist
