@@ -4,7 +4,7 @@
 
 | NOME | RA |
 | ----------- | ----------- |
-| Bruno Sanches | XXXXXXXXXXX |
+| Bruno Sanches | 11201721076 |
 | Enzo Shiraishi | XXXXXXXXXXX |
 | Gustavo Fonseca | 11201921803 |
 | Leonardo Vitturi Ribeiro | 11201722342 |
