@@ -8,7 +8,7 @@
 | Enzo Shiraishi | XXXXXXXXXXX |
 | Gustavo Fonseca | 11201921803 |
 | Leonardo Vitturi Ribeiro | 11201722342 |
-| Paloma Santana | XXXXXXXXXXX |
+| Paloma Santana | 11201921396 |
 
 
 ## Checklist
