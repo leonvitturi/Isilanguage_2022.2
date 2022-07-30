@@ -89,83 +89,85 @@ declaravar :  tipo ID  {
            
 tipo       : 'numero' { _tipo = IsiVariable.NUMBER;  }
            | 'texto'  { _tipo = IsiVariable.TEXT;  }
+           | 'caractere' { _tipo = IsiVariable.CHAR;  }
+           | 'logico' { _tipo = IsiVariable.BOOLEAN;  }
            ;
-        
-bloco	: { curThread = new ArrayList<AbstractCommand>(); 
-	        stack.push(curThread);  
+
+bloco	: { curThread = new ArrayList<AbstractCommand>();
+	        stack.push(curThread);
           }
           (cmd)+
 		;
-		
 
-cmd		:  cmdleitura  
- 		|  cmdescrita 
+
+cmd		:  cmdleitura
+ 		|  cmdescrita
  		|  cmdattrib
- 		|  cmdselecao  
+ 		|  cmdselecao
 		;
-		
+
 cmdleitura	: 'leia' AP
                      ID { verificaID(_input.LT(-1).getText());
                      	  _readID = _input.LT(-1).getText();
-                        } 
-                     FP 
-                     SC 
-                     
+                        }
+                     FP
+                     SC
+
               {
               	IsiVariable var = (IsiVariable)symbolTable.get(_readID);
               	CommandLeitura cmd = new CommandLeitura(_readID, var);
               	stack.peek().add(cmd);
-              }   
+              }
 			;
-			
-cmdescrita	: 'escreva' 
-                 AP 
+
+cmdescrita	: 'escreva'
+                 AP
                  ID { verificaID(_input.LT(-1).getText());
 	                  _writeID = _input.LT(-1).getText();
-                     } 
-                 FP 
+                     }
+                 FP
                  SC
                {
                	  CommandEscrita cmd = new CommandEscrita(_writeID);
                	  stack.peek().add(cmd);
                }
 			;
-			
+
 cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
                     _exprID = _input.LT(-1).getText();
-                   } 
-               ATTR { _exprContent = ""; } 
-               expr 
+                   }
+               ATTR { _exprContent = ""; }
+               expr
                SC
                {
                	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
                	 stack.peek().add(cmd);
                }
 			;
-			
-			
+
+
 cmdselecao  :  'se' AP
                     ID    { _exprDecision = _input.LT(-1).getText(); }
                     OPREL { _exprDecision += _input.LT(-1).getText(); }
                     (ID | NUMBER) {_exprDecision += _input.LT(-1).getText(); }
-                    FP 
-                    ACH 
-                    { curThread = new ArrayList<AbstractCommand>(); 
+                    FP
+                    ACH
+                    { curThread = new ArrayList<AbstractCommand>();
                       stack.push(curThread);
                     }
-                    (cmd)+ 
-                    
-                    FCH 
+                    (cmd)+
+
+                    FCH
                     {
-                       listaTrue = stack.pop();	
-                    } 
-                   ('senao' 
+                       listaTrue = stack.pop();
+                    }
+                   ('senao'
                    	 ACH
                    	 {
                    	 	curThread = new ArrayList<AbstractCommand>();
                    	 	stack.push(curThread);
-                   	 } 
-                   	(cmd+) 
+                   	 }
+                   	(cmd+)
                    	FCH
                    	{
                    		listaFalse = stack.pop();
@@ -174,56 +176,69 @@ cmdselecao  :  'se' AP
                    	}
                    )?
             ;
-			
-expr		:  termo ( 
+
+expr		:  termo (
 	             OP  { _exprContent += _input.LT(-1).getText();}
 	            termo
 	            )*
 			;
-			
+
 termo		: ID { verificaID(_input.LT(-1).getText());
 	               _exprContent += _input.LT(-1).getText();
-                 } 
-            | 
+                 }
+            |
               NUMBER
               {
               	_exprContent += _input.LT(-1).getText();
               }
 			;
-			
-	
+
+
 AP	: '('
 	;
-	
+
 FP	: ')'
 	;
-	
+
 SC	: ';'
 	;
-	
+
 OP	: '+' | '-' | '*' | '/'
 	;
-	
+
 ATTR : '='
 	 ;
-	 
+
 VIR  : ','
      ;
-     
+
 ACH  : '{'
      ;
-     
+
 FCH  : '}'
      ;
-	 
-	 
+
+
 OPREL : '>' | '<' | '>=' | '<=' | '==' | '!='
       ;
-      
+
 ID	: [a-z] ([a-z] | [A-Z] | [0-9])*
 	;
-	
+
 NUMBER	: [0-9]+ ('.' [0-9]+)?
 		;
-		
+
+TEXT : '"' ( '\\"' | . )*? '"'
+	 ;
+
+CHAR : '\'' ( '\\\'' | . ) '\''
+     ;
+
+BOOLEAN : ([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])
+        ;
+
 WS	: (' ' | '\t' | '\n' | '\r') -> skip;
+
+MLCOMMENT : ('/*' .*? '*/') -> skip;
+
+SLCOMMENT: ('//' ~[\r\n]*)  -> skip;
