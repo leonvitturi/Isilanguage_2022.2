@@ -19,13 +19,13 @@ public class CommandDecisao extends AbstractCommand {
 		StringBuilder str = new StringBuilder();
 		str.append("if ("+condition+") {\n");
 		for (AbstractCommand cmd: listaTrue) {
-			str.append("\t"+cmd.generateJavaCode());
+			str.append("\t\t\t"+cmd.generateJavaCode());
 		}
 		str.append("}\n");
 		if (listaFalse.size() > 0) {
-			str.append("else {\n");
+			str.append("\t\telse {\n");
 			for (AbstractCommand cmd: listaFalse) {
-				str.append("\t"+cmd.generateJavaCode());
+				str.append("\t\t\t"+cmd.generateJavaCode());
 			}
 			str.append("}\n");
 		

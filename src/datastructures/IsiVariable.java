@@ -48,7 +48,7 @@ public class IsiVariable extends IsiSymbol {
 			str = "char ";
 		}
 		else {
-			str = "bool ";
+			str = "boolean ";
 		}
 		return str + " " + super.name + ";";
 	}

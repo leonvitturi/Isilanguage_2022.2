@@ -219,6 +219,21 @@ termo		: ID { verificaID(_input.LT(-1).getText());
               {
               	_exprContent += _input.LT(-1).getText();
               }
+			|
+			   CHAR
+			  {
+              	_exprContent += _input.LT(-1).getText();
+              }
+			|
+			   TEXT
+			   {
+              	_exprContent += _input.LT(-1).getText();
+               }
+			|
+			   BOOLEAN
+			   {
+              	_exprContent += _input.LT(-1).getText();
+               }
 			;
 
 
@@ -249,6 +264,9 @@ FCH  : '}'
 OPREL : '>' | '<' | '>=' | '<=' | '==' | '!='
       ;
 
+BOOLEAN : 'true'|'false'
+      ;
+	  
 ID	: [a-z] ([a-z] | [A-Z] | [0-9])*
 	;
 
@@ -260,10 +278,6 @@ TEXT : '"' ( '\\"' | . )*? '"'
 
 CHAR : '\'' ( '\\\'' | . ) '\''
      ;
-
-BOOLEAN : ('true'|'false')
-        ;
-
 WS	: (' ' | '\t' | '\n' | '\r') -> skip;
 
 MLCOMMENT : ('/*' .*? '*/') -> skip;

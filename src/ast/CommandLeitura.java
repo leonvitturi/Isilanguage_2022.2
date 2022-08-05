@@ -20,7 +20,7 @@ public class CommandLeitura extends AbstractCommand {
 			case IsiVariable.TEXT:
 				return id +"= _key.nextLine();";
 			case IsiVariable.CHAR:
-				return id +"= _key.nextChar();";
+				return id +"= _key.next().charAt(0);";
 			case IsiVariable.BOOLEAN:
 				return id +"= _key.nextBoolean();";
 			default:

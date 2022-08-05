@@ -31,7 +31,7 @@ public class IsiSymbolTable {
 				.filter(symbol -> !symbol.isUsed)
 				.collect(Collectors.toList());
 	}
-	//Não entendi a utilidade
+	
 	public String getTypeBy(String id) {
 		IsiVariable variable = (IsiVariable) this.get(id);
 		switch (variable.getType()) {
@@ -50,7 +50,7 @@ public class IsiSymbolTable {
 
 	public boolean checkInitialized(String id) {
 		IsiSymbol  symbol = this.get(id);
-		return !symbol.isInitialized();//não deveria ser apenas 'symbol.isInitialized()'?
+		return symbol.isInitialized();
 	}
 
 	public void setInitializedBy(String id) {

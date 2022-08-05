@@ -2,9 +2,16 @@ programa
 
   numero a, b;
   texto  t1;
+  logico l;
+  caractere c;
 
   leia(a);
   leia(b);
+  leia(c);
+  
+  l=true;
+  c='A';
+  t1="PALAVRA";
 
   a = 1 + 2 * 3 / b;
 
