@@ -1,16 +1,18 @@
 grammar IsiLang;
 
 @header{
-	import IsiSymbol;
-	import IsiVariable;
-	import IsiSymbolTable;
-	import IsiSemanticException;
-	import IsiProgram;
-	import AbstractCommand;
-	import CommandLeitura;
-	import CommandEscrita;
-	import CommandAtribuicao;
-	import CommandDecisao;
+	import datastructures.IsiSymbol;
+	import datastructures.IsiVariable;
+	import datastructures.IsiSymbolTable;
+	import exceptions.IsiSemanticException;
+	import ast.IsiProgram;
+	import ast.AbstractCommand;
+	import ast.CommandEnquanto;
+	//import ast.CommandEscolha;
+	import ast.CommandLeitura;
+	import ast.CommandEscrita;
+	import ast.CommandAtribuicao;
+	import ast.CommandDecisao;
 	import java.util.ArrayList;
 	import java.util.Stack;
 }
@@ -19,18 +21,22 @@ grammar IsiLang;
 	private int _tipo;
 	private String _varName;
 	private String _varValue;
+
 	private IsiSymbolTable symbolTable = new IsiSymbolTable();
 	private IsiSymbol symbol;
 	private IsiProgram program = new IsiProgram();
 	private ArrayList<AbstractCommand> curThread;
 	private Stack<ArrayList<AbstractCommand>> stack = new Stack<ArrayList<AbstractCommand>>();
 	private String _readID;
+	private String _IDEscolha;
 	private String _writeID;
 	private String _exprID;
 	private String _exprContent;
 	private String _exprDecision;
 	private ArrayList<AbstractCommand> listaTrue;
 	private ArrayList<AbstractCommand> listaFalse;
+	private ArrayList<AbstractCommand> listaEnq;
+	
 	
 	public void verificaID(String id){
 		if (!symbolTable.exists(id)){
@@ -52,7 +58,6 @@ grammar IsiLang;
 prog	: 'programa' decl bloco  'fimprog;'
            {  program.setVarTable(symbolTable);
            	  program.setComandos(stack.pop());
-           	 
            } 
 		;
 		
@@ -89,83 +94,86 @@ declaravar :  tipo ID  {
            
 tipo       : 'numero' { _tipo = IsiVariable.NUMBER;  }
            | 'texto'  { _tipo = IsiVariable.TEXT;  }
+           | 'caractere' { _tipo = IsiVariable.CHAR;  }
+           | 'logico' { _tipo = IsiVariable.BOOLEAN;  }
            ;
-        
-bloco	: { curThread = new ArrayList<AbstractCommand>(); 
-	        stack.push(curThread);  
+
+bloco	: { curThread = new ArrayList<AbstractCommand>();
+	        stack.push(curThread);
           }
           (cmd)+
 		;
-		
 
-cmd		:  cmdleitura  
- 		|  cmdescrita 
+
+cmd		:  cmdleitura
+ 		|  cmdescrita
  		|  cmdattrib
- 		|  cmdselecao  
-		;
-		
+ 		|  cmdselecao
+		|  cmdenquanto
+		;  
+
 cmdleitura	: 'leia' AP
                      ID { verificaID(_input.LT(-1).getText());
                      	  _readID = _input.LT(-1).getText();
-                        } 
-                     FP 
-                     SC 
-                     
+                        }
+                     FP
+                     SC
+
               {
-              	IsiVariable var = (IsiVariable)symbolTable.get(_readID);
+              	IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
               	CommandLeitura cmd = new CommandLeitura(_readID, var);
               	stack.peek().add(cmd);
-              }   
+              }
 			;
-			
-cmdescrita	: 'escreva' 
-                 AP 
+//Atualizar para reconhecer texto tbm
+cmdescrita	: 'escreva'
+                 AP
                  ID { verificaID(_input.LT(-1).getText());
 	                  _writeID = _input.LT(-1).getText();
-                     } 
-                 FP 
+                     }
+                 FP
                  SC
                {
                	  CommandEscrita cmd = new CommandEscrita(_writeID);
                	  stack.peek().add(cmd);
                }
 			;
-			
+
 cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
                     _exprID = _input.LT(-1).getText();
-                   } 
-               ATTR { _exprContent = ""; } 
-               expr 
-               SC
+                   }
+               ATTR { _exprContent = ""; }
+               expr
+               SC //ADICIONAR VERIFICAÇÃO DE COMPATIBILIDADE
                {
                	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
                	 stack.peek().add(cmd);
                }
 			;
-			
-			
+
+
 cmdselecao  :  'se' AP
                     ID    { _exprDecision = _input.LT(-1).getText(); }
                     OPREL { _exprDecision += _input.LT(-1).getText(); }
-                    (ID | NUMBER) {_exprDecision += _input.LT(-1).getText(); }
-                    FP 
-                    ACH 
-                    { curThread = new ArrayList<AbstractCommand>(); 
-                      stack.push(curThread);
+                    (ID | NUMBER) { _exprDecision += _input.LT(-1).getText(); }
+                    FP //adicionar verificação de compatibilidade
+                    ACH
+                    {	curThread = new ArrayList<AbstractCommand>();
+                    	stack.push(curThread);
                     }
-                    (cmd)+ 
-                    
-                    FCH 
+                    (cmd)+
+
+                    FCH
                     {
-                       listaTrue = stack.pop();	
-                    } 
-                   ('senao' 
+                    	listaTrue = stack.pop();
+                    }
+                   ('senao'
                    	 ACH
                    	 {
                    	 	curThread = new ArrayList<AbstractCommand>();
                    	 	stack.push(curThread);
-                   	 } 
-                   	(cmd+) 
+                   	 }
+                   	(cmd+)
                    	FCH
                    	{
                    		listaFalse = stack.pop();
@@ -174,56 +182,90 @@ cmdselecao  :  'se' AP
                    	}
                    )?
             ;
-			
-expr		:  termo ( 
+
+cmdenquanto  : 'enquanto' AP
+                          ID { _exprDecision = _input.LT(-1).getText(); }
+                          OPREL { _exprDecision += _input.LT(-1).getText(); }
+                          (ID | NUMBER) {_exprDecision += _input.LT(-1).getText(); }
+                          FP //adicionar verificação de compatibilidade
+				'faca'
+                           ACH 
+                           { 
+                           	curThread = new ArrayList<AbstractCommand>();
+                           	stack.push(curThread);
+                           }
+                           (cmd)+ 
+
+                           FCH 
+                           {
+                            listaEnq = stack.pop();
+                            CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
+                            stack.peek().add(cmd);
+                           }
+			 ;
+
+
+expr		:  termo (
 	             OP  { _exprContent += _input.LT(-1).getText();}
 	            termo
 	            )*
 			;
-			
+
 termo		: ID { verificaID(_input.LT(-1).getText());
 	               _exprContent += _input.LT(-1).getText();
-                 } 
-            | 
+                 }
+            |
               NUMBER
               {
               	_exprContent += _input.LT(-1).getText();
               }
 			;
-			
-	
+
+
 AP	: '('
 	;
-	
+
 FP	: ')'
 	;
-	
+
 SC	: ';'
 	;
-	
+
 OP	: '+' | '-' | '*' | '/'
 	;
-	
+
 ATTR : '='
 	 ;
-	 
+
 VIR  : ','
      ;
-     
+
 ACH  : '{'
      ;
-     
+
 FCH  : '}'
      ;
-	 
-	 
+
 OPREL : '>' | '<' | '>=' | '<=' | '==' | '!='
       ;
-      
+
 ID	: [a-z] ([a-z] | [A-Z] | [0-9])*
 	;
-	
+
 NUMBER	: [0-9]+ ('.' [0-9]+)?
 		;
-		
+
+TEXT : '"' ( '\\"' | . )*? '"'
+	 ;
+
+CHAR : '\'' ( '\\\'' | . ) '\''
+     ;
+
+BOOLEAN : ('true'|'false')
+        ;
+
 WS	: (' ' | '\t' | '\n' | '\r') -> skip;
+
+MLCOMMENT : ('/*' .*? '*/') -> skip;
+
+SLCOMMENT: ('//' ~[\r\n]*)  -> skip;

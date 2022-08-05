@@ -5,9 +5,12 @@ programa
 
   leia(a);
   leia(b);
-  
+
   a = 1 + 2 * 3 / b;
-  
+
+  enquanto ( a > b ) faca {
+   escreva(b);
+  } 
 
   se ( a > b ) {
      escreva (a);
@@ -15,7 +18,7 @@ programa
   senao {
      escreva (b);
   }
-  
+
   
 
 fimprog;
