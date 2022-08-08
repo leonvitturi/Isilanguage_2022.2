@@ -99,7 +99,7 @@ public class IsiLangLexer extends Lexer {
 		private int _tipo;
 		private String _varName;
 		private String _varValue;
-
+		private ArrayList<Integer> _tipoVar = new ArrayList<Integer>();
 		private IsiSymbolTable symbolTable = new IsiSymbolTable();
 		private IsiSymbol symbol;
 		private IsiProgram program = new IsiProgram();
@@ -120,6 +120,33 @@ public class IsiLangLexer extends Lexer {
 			if (!symbolTable.exists(id)){
 				throw new IsiSemanticException("Symbol "+id+" not declared");
 			}
+		}
+
+		public String typeToString(int isiType) {
+			switch (isiType) {
+				case 0: 
+					return "NUMBER";
+				case 1:
+					return "TEXT";
+				case 2:
+					return "CHAR";
+				case 3:
+					return "BOOLEAN";
+				default:
+					return "";
+			}
+		} 
+
+		public void verificaCompatibilidade(ArrayList<Integer> tipos) {
+			int tipoEsq = tipos.get(0);
+			for (int tipo: tipos) {
+				if (tipoEsq != tipo) {
+					String errorMsg = String.format("Type mismatch: %s and %s", typeToString(tipoEsq), typeToString(tipo));
+					tipos.removeAll(tipos);
+					throw new IsiSemanticException(errorMsg);
+				}
+			}
+			tipos.removeAll(tipos);
 		}
 		
 		public void exibeComandos(){

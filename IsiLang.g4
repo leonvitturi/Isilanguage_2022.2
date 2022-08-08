@@ -21,7 +21,7 @@ grammar IsiLang;
 	private int _tipo;
 	private String _varName;
 	private String _varValue;
-
+	private ArrayList<Integer> _tipoVar = new ArrayList<Integer>();
 	private IsiSymbolTable symbolTable = new IsiSymbolTable();
 	private IsiSymbol symbol;
 	private IsiProgram program = new IsiProgram();
@@ -42,6 +42,33 @@ grammar IsiLang;
 		if (!symbolTable.exists(id)){
 			throw new IsiSemanticException("Symbol "+id+" not declared");
 		}
+	}
+
+	public String typeToString(int isiType) {
+		switch (isiType) {
+			case 0: 
+				return "NUMBER";
+			case 1:
+				return "TEXT";
+			case 2:
+				return "CHAR";
+			case 3:
+				return "BOOLEAN";
+			default:
+				return "";
+		}
+	} 
+
+	public void verificaCompatibilidade(ArrayList<Integer> tipos) {
+		int tipoEsq = tipos.get(0);
+		for (int tipo: tipos) {
+			if (tipoEsq != tipo) {
+				String errorMsg = String.format("Type mismatch: %s and %s", typeToString(tipoEsq), typeToString(tipo));
+				tipos.removeAll(tipos);
+				throw new IsiSemanticException(errorMsg);
+			}
+		}
+		tipos.removeAll(tipos);
 	}
 	
 	public void exibeComandos(){
@@ -141,11 +168,13 @@ cmdescrita	: 'escreva'
 
 cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
                     _exprID = _input.LT(-1).getText();
+					_tipoVar.add(symbolTable.getTypeBy(_exprID));
                    }
                ATTR { _exprContent = ""; }
                expr
-               SC //ADICIONAR VERIFICAÇÃO DE COMPATIBILIDADE
+               SC
                {
+				 verificaCompatibilidade(_tipoVar);
                	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
                	 stack.peek().add(cmd);
                }
@@ -153,10 +182,22 @@ cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
 
 
 cmdselecao  :  'se' AP
-                    ID    { _exprDecision = _input.LT(-1).getText(); }
+                    ID    {
+							verificaID(_input.LT(-1).getText());
+							_exprDecision = _input.LT(-1).getText();
+							_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+						  }
                     OPREL { _exprDecision += _input.LT(-1).getText(); }
-                    (ID | NUMBER) { _exprDecision += _input.LT(-1).getText(); }
-                    FP //adicionar verificação de compatibilidade
+                    (ID | NUMBER) {
+						if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
+							_tipoVar.add(IsiVariable.NUMBER);
+						else {
+							verificaID(_input.LT(-1).getText());
+							_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+						}
+						_exprDecision += _input.LT(-1).getText();
+						}
+                    FP { verificaCompatibilidade(_tipoVar); }
                     ACH
                     {	curThread = new ArrayList<AbstractCommand>();
                     	stack.push(curThread);
@@ -184,10 +225,24 @@ cmdselecao  :  'se' AP
             ;
 
 cmdenquanto  : 'enquanto' AP
-                          ID { _exprDecision = _input.LT(-1).getText(); }
-                          OPREL { _exprDecision += _input.LT(-1).getText(); }
-                          (ID | NUMBER) {_exprDecision += _input.LT(-1).getText(); }
-                          FP //adicionar verificação de compatibilidade
+                          
+						  ID    {
+									verificaID(_input.LT(-1).getText());
+									_exprDecision = _input.LT(-1).getText();
+									_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+								}
+						  OPREL { _exprDecision += _input.LT(-1).getText(); }
+						  (ID | NUMBER)
+						 		{
+									if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
+										_tipoVar.add(IsiVariable.NUMBER);
+									else {
+										verificaID(_input.LT(-1).getText());
+										_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+									}
+									_exprDecision += _input.LT(-1).getText();
+								}
+						  FP 	{ verificaCompatibilidade(_tipoVar); }
 				'faca'
                            ACH 
                            { 
@@ -212,26 +267,31 @@ expr		:  termo (
 			;
 
 termo		: ID { verificaID(_input.LT(-1).getText());
-	               _exprContent += _input.LT(-1).getText();
+	               _tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+				   _exprContent += _input.LT(-1).getText();
                  }
             |
               NUMBER
               {
+				_tipoVar.add(IsiVariable.NUMBER);
               	_exprContent += _input.LT(-1).getText();
               }
 			|
 			   CHAR
 			  {
+				_tipoVar.add(IsiVariable.CHAR);
               	_exprContent += _input.LT(-1).getText();
               }
 			|
 			   TEXT
 			   {
+				_tipoVar.add(IsiVariable.TEXT);
               	_exprContent += _input.LT(-1).getText();
                }
 			|
 			   BOOLEAN
 			   {
+				_tipoVar.add(IsiVariable.BOOLEAN);
               	_exprContent += _input.LT(-1).getText();
                }
 			;

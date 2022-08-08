@@ -32,20 +32,9 @@ public class IsiSymbolTable {
 				.collect(Collectors.toList());
 	}
 	
-	public String getTypeBy(String id) {
+	public int getTypeBy(String id) {
 		IsiVariable variable = (IsiVariable) this.get(id);
-		switch (variable.getType()) {
-			case IsiVariable.NUMBER: 
-				return "NUMBER";
-			case IsiVariable.TEXT:
-				return "TEXT";
-			case IsiVariable.CHAR:
-				return "CHAR";
-			case IsiVariable.BOOLEAN:
-				return "BOOLEAN";
-			default:
-				return "";
-		}
+		return variable.getType();
 	}
 
 	public boolean checkInitialized(String id) {
