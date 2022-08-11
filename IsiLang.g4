@@ -80,6 +80,24 @@ grammar IsiLang;
 	public void generateCode(){
 		program.generateTarget();
 	}
+
+	public void checkInitialized(String id) {
+        if(!symbolTable.checkInitialized(id))){
+            throw new IsiSemanticException("Symbol "+id+" not initialized");
+        }
+    }
+
+    public void setInitialized(String id) {
+        symbolTable.setInitializedBy(id);
+    }
+
+    public ArrayList<String> getWarningsNotUsedVariables() {
+        ArrayList<String> w = new ArrayList<String>();
+        for(IsiSymbol s: symbolTable.getNonUsed()) {
+            w.add("Warning: Variável <" + s.getName() + "> foi declarada, mas nao utilizada");
+        }
+        return w;
+    }
 }
 
 prog	: 'programa' decl bloco  'fimprog;'
@@ -144,7 +162,9 @@ cmdleitura	: 'leia' AP
                      	  _readID = _input.LT(-1).getText();
                         }
                      FP
-                     SC
+                     SC {
+                        setInitialized(_readID);
+                     }
 
               {
               	IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
@@ -157,6 +177,7 @@ cmdescrita	: 'escreva'
                  AP
                  ID { verificaID(_input.LT(-1).getText());
 	                  _writeID = _input.LT(-1).getText();
+	                  checkInitialized(_writeID);
                      }
                  FP
                  SC
@@ -176,6 +197,7 @@ cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
                {
 				 verificaCompatibilidade(_tipoVar);
                	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
+               	 setInitialized(_exprID);
                	 stack.peek().add(cmd);
                }
 			;
@@ -267,6 +289,7 @@ expr		:  termo (
 			;
 
 termo		: ID { verificaID(_input.LT(-1).getText());
+                   checkInitialized(id);
 	               _tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 				   _exprContent += _input.LT(-1).getText();
                  }
