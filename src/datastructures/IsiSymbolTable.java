@@ -22,7 +22,9 @@ public class IsiSymbolTable {
 	}
 	
 	public IsiSymbol get(String symbolName) {
-		return map.get(symbolName);
+		String isiSymbol = map.get(symbolName);
+		isiSymbol.setUsed();
+		return isiSymbol;
 	}
 
 	public List<IsiSymbol> getNotUsedSymbols() {
