@@ -38,9 +38,8 @@ grammar IsiLang;
 	
 	
 	public void verificaID(String id){
-		if (!symbolTable.exists(id)){
+		if (!symbolTable.exists(id))
 			throw new IsiSemanticException("Symbol "+id+" not declared");
-		}
 	}
 
 	public String typeToString(int isiType) {
@@ -69,15 +68,33 @@ grammar IsiLang;
 		}
 		tipos.removeAll(tipos);
 	}
+
+	public void verificaAttrib(String id) {
+		if (symbolTable.exists(id) && symbolTable.get(id) == null)
+			throw new IsiSemanticException(String.format("\"%s\" has not been initialized.", id));
+	}
 	
 	public String lastToken() {
 		return _input.LT(-1).getText();
 	}
 
+	public void checkInitialized(String id) {
+        if(!symbolTable.checkInitialized(id))
+            throw new IsiSemanticException("Symbol "+id+" not initialized");
+    }
+
+    public void setInitialized(String id) {
+        symbolTable.setInitializedBy(id);
+    }
+
+    public void showWarningsUnusedVariables() {
+        for(IsiSymbol s: symbolTable.getNotUsedSymbols())
+            System.out.println("Warning: Variável <" + s.getName() + "> foi declarada, mas nao utilizada");
+    }
+
 	public void exibeComandos(){
-		for (AbstractCommand c: program.getComandos()){
+		for (AbstractCommand c: program.getComandos())
 			System.out.println(c);
-		}
 	}
 	
 	public void generateCode(){
@@ -85,11 +102,15 @@ grammar IsiLang;
 	}
 }
 
-prog	: 'programa' decl bloco  'fimprog;'
-           {  program.setVarTable(symbolTable);
-           	  program.setComandos(stack.pop());
-           } 
-		;
+prog : 'programa'
+	   decl
+	   bloco
+	   'fimprog;' {
+					program.setVarTable(symbolTable);
+					program.setComandos(stack.pop());
+					showWarningsUnusedVariables();
+				  } 
+	 ;
 		
 decl    :  (declaravar)+
         ;
@@ -104,7 +125,8 @@ declaravar :  tipo  ID   {
 	                      	 else
 	                      	 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
                          }  
-                    (VIR 
+                    (
+					VIR 
               	    ID   {
 	                  		 _varName = lastToken();
 	                  		 _varValue = null;
@@ -124,7 +146,8 @@ tipo       : 'numero' 	 { _tipo = IsiVariable.NUMBER;  }
            | 'logico' 	 { _tipo = IsiVariable.BOOLEAN;  }
            ;
 
-bloco	: { curThread = new ArrayList<AbstractCommand>();
+bloco	: {
+			curThread = new ArrayList<AbstractCommand>();
 	        stack.push(curThread);
           }
           (cmd)+
@@ -138,17 +161,19 @@ cmd		:  cmdleitura
 		|  cmdenquanto
 		;  
 
-cmdleitura	: 'leia' AP
-                     ID { 
-						  verificaID(lastToken());
-                     	  _readID = lastToken();
-                        }
-                     FP
-                     SC {
-              			  IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
-              			  CommandLeitura cmd = new CommandLeitura(_readID, var);
-              			  stack.peek().add(cmd);
-              			}
+cmdleitura	: 'leia'
+			  AP
+			  ID { 
+					verificaID(lastToken());
+					_readID = lastToken();
+				 }
+			  FP
+			  SC {
+					IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
+					CommandLeitura cmd = new CommandLeitura(_readID, var);
+					setInitialized(_readID);
+					stack.peek().add(cmd);
+				 }
 			;
 //Atualizar para reconhecer texto tbm
 cmdescrita	: 'escreva'
@@ -156,6 +181,7 @@ cmdescrita	: 'escreva'
                  ID  {
 						verificaID(lastToken());
 	                  	_writeID = lastToken();
+						checkInitialized(_writeID);	
                      }
                  FP
                  SC  {
@@ -166,6 +192,7 @@ cmdescrita	: 'escreva'
 
 cmdattrib	:  ID 	{
 						verificaID(lastToken());
+						verificaAttrib(lastToken());
                     	_exprID = lastToken();
 						_tipoVar.add(symbolTable.getTypeBy(_exprID));
                     }
@@ -176,7 +203,8 @@ cmdattrib	:  ID 	{
                SC   {
 				 		verificaCompatibilidade(_tipoVar);
                	 		CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
-               	 		stack.peek().add(cmd);
+               	 		setInitialized(_readID);
+						stack.peek().add(cmd);
                		}
 			;
 
@@ -184,11 +212,13 @@ cmdattrib	:  ID 	{
 cmdselecao  :  'se' AP
                     ID    		  {
 									verificaID(lastToken());
+									verificaAttrib(lastToken());
 									_exprDecision = lastToken();
 									_tipoVar.add(symbolTable.getTypeBy(lastToken()));
 						  		  }
                     OPREL 		  { _exprDecision += lastToken(); }
                     (ID | NUMBER) {
+									verificaAttrib(lastToken());
 									if (lastToken().matches("\\d+(\\.\\d+)?"))
 										_tipoVar.add(IsiVariable.NUMBER);
 									else {
@@ -227,12 +257,14 @@ cmdenquanto  : 			  'enquanto'
                           
 						  ID		    {
 									 	  verificaID(lastToken());
+										  verificaAttrib(lastToken());
 										  _exprDecision = lastToken();
 										  _tipoVar.add(symbolTable.getTypeBy(lastToken()));
 										}
 						  OPREL 		{ _exprDecision += lastToken(); }
 						  (ID | NUMBER)
 						 				{
+											verificaAttrib(lastToken());
 											if (lastToken().matches("\\d+(\\.\\d+)?"))
 												_tipoVar.add(IsiVariable.NUMBER);
 											else {
@@ -268,6 +300,7 @@ expr		:  termo
 
 termo		: ID 	  {
 				   	   	verificaID(lastToken());
+						checkInitialized(lastToken());
 	               	   	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
 					   	_exprContent += lastToken();
                  	  }
