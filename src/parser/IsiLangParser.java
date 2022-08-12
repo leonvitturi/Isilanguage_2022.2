@@ -8,7 +8,6 @@ package parser;
 	import ast.IsiProgram;
 	import ast.AbstractCommand;
 	import ast.CommandEnquanto;
-	//import ast.CommandEscolha;
 	import ast.CommandLeitura;
 	import ast.CommandEscrita;
 	import ast.CommandAtribuicao;
@@ -155,6 +154,10 @@ public class IsiLangParser extends Parser {
 			tipos.removeAll(tipos);
 		}
 		
+		public String lastToken() {
+			return _input.LT(-1).getText();
+		}
+
 		public void exibeComandos(){
 			for (AbstractCommand c: program.getComandos()){
 				System.out.println(c);
@@ -313,17 +316,15 @@ public class IsiLangParser extends Parser {
 			tipo();
 			setState(38);
 			match(ID);
-
-				                  _varName = _input.LT(-1).getText();
-				                  _varValue = null;
-				                  symbol = new IsiVariable(_varName, _tipo, _varValue);
-				                  if (!symbolTable.exists(_varName)){
-				                     symbolTable.add(symbol);	
-				                  }
-				                  else{
-				                  	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
-				                  }
-			                    
+			 
+				                      	 _varName = lastToken();
+				                      	 _varValue = null;
+				                      	 symbol = new IsiVariable(_varName, _tipo, _varValue);
+				                      	 if (!symbolTable.exists(_varName))
+				                      	    symbolTable.add(symbol);	
+				                      	 else
+				                      	 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
+			                         
 			setState(45);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -335,16 +336,14 @@ public class IsiLangParser extends Parser {
 				setState(41);
 				match(ID);
 
-					                  _varName = _input.LT(-1).getText();
-					                  _varValue = null;
-					                  symbol = new IsiVariable(_varName, _tipo, _varValue);
-					                  if (!symbolTable.exists(_varName)){
-					                     symbolTable.add(symbol);	
-					                  }
-					                  else{
-					                  	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
-					                  }
-				                    
+					                  		 _varName = lastToken();
+					                  		 _varValue = null;
+					                  		 symbol = new IsiVariable(_varName, _tipo, _varValue);
+					                  		 if (!symbolTable.exists(_varName))
+					                  		    symbolTable.add(symbol);	
+					                  		 else
+					                  		 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
+				                         
 				}
 				}
 				setState(47);
@@ -611,18 +610,19 @@ public class IsiLangParser extends Parser {
 			match(AP);
 			setState(75);
 			match(ID);
-			 verificaID(_input.LT(-1).getText());
-			                     	  _readID = _input.LT(-1).getText();
+			 
+									  verificaID(lastToken());
+			                     	  _readID = lastToken();
 			                        
 			setState(77);
 			match(FP);
 			setState(78);
 			match(SC);
 
-			              	IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
-			              	CommandLeitura cmd = new CommandLeitura(_readID, var);
-			              	stack.peek().add(cmd);
-			              
+			              			  IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
+			              			  CommandLeitura cmd = new CommandLeitura(_readID, var);
+			              			  stack.peek().add(cmd);
+			              			
 			}
 		}
 		catch (RecognitionException re) {
@@ -667,17 +667,18 @@ public class IsiLangParser extends Parser {
 			match(AP);
 			setState(83);
 			match(ID);
-			 verificaID(_input.LT(-1).getText());
-				                  _writeID = _input.LT(-1).getText();
+
+									verificaID(lastToken());
+				                  	_writeID = lastToken();
 			                     
 			setState(85);
 			match(FP);
 			setState(86);
 			match(SC);
 
-			               	  CommandEscrita cmd = new CommandEscrita(_writeID);
-			               	  stack.peek().add(cmd);
-			               
+			               		 	CommandEscrita cmd = new CommandEscrita(_writeID);
+			               	  		stack.peek().add(cmd);
+			               		 
 			}
 		}
 		catch (RecognitionException re) {
@@ -720,22 +721,25 @@ public class IsiLangParser extends Parser {
 			{
 			setState(89);
 			match(ID);
-			 verificaID(_input.LT(-1).getText());
-			                    _exprID = _input.LT(-1).getText();
-								_tipoVar.add(symbolTable.getTypeBy(_exprID));
-			                   
+
+									verificaID(lastToken());
+			                    	_exprID = lastToken();
+									_tipoVar.add(symbolTable.getTypeBy(_exprID));
+			                    
 			setState(91);
 			match(ATTR);
-			 _exprContent = ""; 
+
+									_exprContent = "";
+								
 			setState(93);
 			expr();
 			setState(94);
 			match(SC);
 
-							 verificaCompatibilidade(_tipoVar);
-			               	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
-			               	 stack.peek().add(cmd);
-			               
+							 		verificaCompatibilidade(_tipoVar);
+			               	 		CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
+			               	 		stack.peek().add(cmd);
+			               		
 			}
 		}
 		catch (RecognitionException re) {
@@ -800,13 +804,13 @@ public class IsiLangParser extends Parser {
 			setState(99);
 			match(ID);
 
-										verificaID(_input.LT(-1).getText());
-										_exprDecision = _input.LT(-1).getText();
-										_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-									  
+												verificaID(lastToken());
+												_exprDecision = lastToken();
+												_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+									  		  
 			setState(101);
 			match(OPREL);
-			 _exprDecision += _input.LT(-1).getText(); 
+			 _exprDecision += lastToken(); 
 			setState(103);
 			_la = _input.LA(1);
 			if ( !(_la==ID || _la==NUMBER) ) {
@@ -818,22 +822,23 @@ public class IsiLangParser extends Parser {
 				consume();
 			}
 
-									if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
-										_tipoVar.add(IsiVariable.NUMBER);
-									else {
-										verificaID(_input.LT(-1).getText());
-										_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-									}
-									_exprDecision += _input.LT(-1).getText();
-									
+												if (lastToken().matches("\\d+(\\.\\d+)?"))
+													_tipoVar.add(IsiVariable.NUMBER);
+												else {
+													verificaID(lastToken());
+													_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+												}
+												_exprDecision += lastToken();
+											  
 			setState(105);
 			match(FP);
 			 verificaCompatibilidade(_tipoVar); 
 			setState(107);
 			match(ACH);
-				curThread = new ArrayList<AbstractCommand>();
-			                    	stack.push(curThread);
-			                    
+
+												curThread = new ArrayList<AbstractCommand>();
+			                    				stack.push(curThread);
+			                    			  
 			setState(110); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -850,9 +855,7 @@ public class IsiLangParser extends Parser {
 			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__6) | (1L << T__7) | (1L << T__8) | (1L << T__10) | (1L << ID))) != 0) );
 			setState(114);
 			match(FCH);
-
-			                    	listaTrue = stack.pop();
-			                    
+			 listaTrue = stack.pop(); 
 			setState(127);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -863,9 +866,9 @@ public class IsiLangParser extends Parser {
 				setState(117);
 				match(ACH);
 
-				                   	 	curThread = new ArrayList<AbstractCommand>();
-				                   	 	stack.push(curThread);
-				                   	 
+													curThread = new ArrayList<AbstractCommand>();
+													stack.push(curThread);
+												  
 				{
 				setState(120); 
 				_errHandler.sync(this);
@@ -885,10 +888,10 @@ public class IsiLangParser extends Parser {
 				setState(124);
 				match(FCH);
 
-				                   		listaFalse = stack.pop();
-				                   		CommandDecisao cmd = new CommandDecisao(_exprDecision, listaTrue, listaFalse);
-				                   		stack.peek().add(cmd);
-				                   	
+													listaFalse = stack.pop();
+													CommandDecisao cmd = new CommandDecisao(_exprDecision, listaTrue, listaFalse);
+													stack.peek().add(cmd);
+												  
 				}
 			}
 
@@ -950,13 +953,13 @@ public class IsiLangParser extends Parser {
 			setState(131);
 			match(ID);
 
-												verificaID(_input.LT(-1).getText());
-												_exprDecision = _input.LT(-1).getText();
-												_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-											
+												 	  verificaID(lastToken());
+													  _exprDecision = lastToken();
+													  _tipoVar.add(symbolTable.getTypeBy(lastToken()));
+													
 			setState(133);
 			match(OPREL);
-			 _exprDecision += _input.LT(-1).getText(); 
+			 _exprDecision += lastToken(); 
 			setState(135);
 			_la = _input.LA(1);
 			if ( !(_la==ID || _la==NUMBER) ) {
@@ -968,14 +971,14 @@ public class IsiLangParser extends Parser {
 				consume();
 			}
 
-												if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
-													_tipoVar.add(IsiVariable.NUMBER);
-												else {
-													verificaID(_input.LT(-1).getText());
-													_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-												}
-												_exprDecision += _input.LT(-1).getText();
-											
+														if (lastToken().matches("\\d+(\\.\\d+)?"))
+															_tipoVar.add(IsiVariable.NUMBER);
+														else {
+															verificaID(lastToken());
+															_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+														}
+														_exprDecision += lastToken();
+													
 			setState(137);
 			match(FP);
 			 verificaCompatibilidade(_tipoVar); 
@@ -984,9 +987,9 @@ public class IsiLangParser extends Parser {
 			setState(140);
 			match(ACH);
 			 
-			                           	curThread = new ArrayList<AbstractCommand>();
-			                           	stack.push(curThread);
-			                           
+													  curThread = new ArrayList<AbstractCommand>();
+			                           				  stack.push(curThread);
+			                           				
 			setState(143); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -1004,10 +1007,10 @@ public class IsiLangParser extends Parser {
 			setState(147);
 			match(FCH);
 
-			                            listaEnq = stack.pop();
-			                            CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
-			                            stack.peek().add(cmd);
-			                           
+			                            			  listaEnq = stack.pop();
+			                            			  CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
+			                            			  stack.peek().add(cmd);
+			                           				
 			}
 		}
 		catch (RecognitionException re) {
@@ -1063,7 +1066,7 @@ public class IsiLangParser extends Parser {
 				{
 				setState(151);
 				match(OP);
-				 _exprContent += _input.LT(-1).getText();
+				 _exprContent += lastToken(); 
 				setState(153);
 				termo();
 				}
@@ -1117,10 +1120,11 @@ public class IsiLangParser extends Parser {
 				{
 				setState(159);
 				match(ID);
-				 verificaID(_input.LT(-1).getText());
-					               _tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-								   _exprContent += _input.LT(-1).getText();
-				                 
+
+								   	   	verificaID(lastToken());
+					               	   	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+									   	_exprContent += lastToken();
+				                 	  
 				}
 				break;
 			case NUMBER:
@@ -1129,9 +1133,9 @@ public class IsiLangParser extends Parser {
 				setState(161);
 				match(NUMBER);
 
-								_tipoVar.add(IsiVariable.NUMBER);
-				              	_exprContent += _input.LT(-1).getText();
-				              
+									   	_tipoVar.add(IsiVariable.NUMBER);
+				              		    _exprContent += lastToken();
+				              		  
 				}
 				break;
 			case CHAR:
@@ -1140,9 +1144,9 @@ public class IsiLangParser extends Parser {
 				setState(163);
 				match(CHAR);
 
-								_tipoVar.add(IsiVariable.CHAR);
-				              	_exprContent += _input.LT(-1).getText();
-				              
+									    _tipoVar.add(IsiVariable.CHAR);
+				              		    _exprContent += lastToken();
+				              		  
 				}
 				break;
 			case TEXT:
@@ -1151,9 +1155,9 @@ public class IsiLangParser extends Parser {
 				setState(165);
 				match(TEXT);
 
-								_tipoVar.add(IsiVariable.TEXT);
-				              	_exprContent += _input.LT(-1).getText();
-				               
+									    _tipoVar.add(IsiVariable.TEXT);
+				              		    _exprContent += lastToken();
+				               		  
 				}
 				break;
 			case BOOLEAN:
@@ -1162,9 +1166,9 @@ public class IsiLangParser extends Parser {
 				setState(167);
 				match(BOOLEAN);
 
-								_tipoVar.add(IsiVariable.BOOLEAN);
-				              	_exprContent += _input.LT(-1).getText();
-				               
+										_tipoVar.add(IsiVariable.BOOLEAN);
+				              			_exprContent += lastToken();
+				               		  
 				}
 				break;
 			default:

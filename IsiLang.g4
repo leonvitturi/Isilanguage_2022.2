@@ -8,7 +8,6 @@ grammar IsiLang;
 	import ast.IsiProgram;
 	import ast.AbstractCommand;
 	import ast.CommandEnquanto;
-	//import ast.CommandEscolha;
 	import ast.CommandLeitura;
 	import ast.CommandEscrita;
 	import ast.CommandAtribuicao;
@@ -71,6 +70,10 @@ grammar IsiLang;
 		tipos.removeAll(tipos);
 	}
 	
+	public String lastToken() {
+		return _input.LT(-1).getText();
+	}
+
 	public void exibeComandos(){
 		for (AbstractCommand c: program.getComandos()){
 			System.out.println(c);
@@ -92,37 +95,33 @@ decl    :  (declaravar)+
         ;
         
         
-declaravar :  tipo ID  {
-	                  _varName = _input.LT(-1).getText();
-	                  _varValue = null;
-	                  symbol = new IsiVariable(_varName, _tipo, _varValue);
-	                  if (!symbolTable.exists(_varName)){
-	                     symbolTable.add(symbol);	
-	                  }
-	                  else{
-	                  	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
-	                  }
-                    } 
-              (  VIR 
-              	 ID {
-	                  _varName = _input.LT(-1).getText();
-	                  _varValue = null;
-	                  symbol = new IsiVariable(_varName, _tipo, _varValue);
-	                  if (!symbolTable.exists(_varName)){
-	                     symbolTable.add(symbol);	
-	                  }
-	                  else{
-	                  	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
-	                  }
-                    }
-              )* 
-               SC
+declaravar :  tipo  ID   { 
+	                      	 _varName = lastToken();
+	                      	 _varValue = null;
+	                      	 symbol = new IsiVariable(_varName, _tipo, _varValue);
+	                      	 if (!symbolTable.exists(_varName))
+	                      	    symbolTable.add(symbol);	
+	                      	 else
+	                      	 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
+                         }  
+                    (VIR 
+              	    ID   {
+	                  		 _varName = lastToken();
+	                  		 _varValue = null;
+	                  		 symbol = new IsiVariable(_varName, _tipo, _varValue);
+	                  		 if (!symbolTable.exists(_varName))
+	                  		    symbolTable.add(symbol);	
+	                  		 else
+	                  		 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
+                         }
+              	    )* 
+               	    SC
            ;
            
-tipo       : 'numero' { _tipo = IsiVariable.NUMBER;  }
-           | 'texto'  { _tipo = IsiVariable.TEXT;  }
+tipo       : 'numero' 	 { _tipo = IsiVariable.NUMBER;  }
+           | 'texto' 	 { _tipo = IsiVariable.TEXT;  }
            | 'caractere' { _tipo = IsiVariable.CHAR;  }
-           | 'logico' { _tipo = IsiVariable.BOOLEAN;  }
+           | 'logico' 	 { _tipo = IsiVariable.BOOLEAN;  }
            ;
 
 bloco	: { curThread = new ArrayList<AbstractCommand>();
@@ -140,160 +139,154 @@ cmd		:  cmdleitura
 		;  
 
 cmdleitura	: 'leia' AP
-                     ID { verificaID(_input.LT(-1).getText());
-                     	  _readID = _input.LT(-1).getText();
+                     ID { 
+						  verificaID(lastToken());
+                     	  _readID = lastToken();
                         }
                      FP
-                     SC
-
-              {
-              	IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
-              	CommandLeitura cmd = new CommandLeitura(_readID, var);
-              	stack.peek().add(cmd);
-              }
+                     SC {
+              			  IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
+              			  CommandLeitura cmd = new CommandLeitura(_readID, var);
+              			  stack.peek().add(cmd);
+              			}
 			;
 //Atualizar para reconhecer texto tbm
 cmdescrita	: 'escreva'
                  AP
-                 ID { verificaID(_input.LT(-1).getText());
-	                  _writeID = _input.LT(-1).getText();
+                 ID  {
+						verificaID(lastToken());
+	                  	_writeID = lastToken();
                      }
                  FP
-                 SC
-               {
-               	  CommandEscrita cmd = new CommandEscrita(_writeID);
-               	  stack.peek().add(cmd);
-               }
+                 SC  {
+               		 	CommandEscrita cmd = new CommandEscrita(_writeID);
+               	  		stack.peek().add(cmd);
+               		 }
 			;
 
-cmdattrib	:  ID { verificaID(_input.LT(-1).getText());
-                    _exprID = _input.LT(-1).getText();
-					_tipoVar.add(symbolTable.getTypeBy(_exprID));
-                   }
-               ATTR { _exprContent = ""; }
+cmdattrib	:  ID 	{
+						verificaID(lastToken());
+                    	_exprID = lastToken();
+						_tipoVar.add(symbolTable.getTypeBy(_exprID));
+                    }
+               ATTR {
+						_exprContent = "";
+					}
                expr
-               SC
-               {
-				 verificaCompatibilidade(_tipoVar);
-               	 CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
-               	 stack.peek().add(cmd);
-               }
+               SC   {
+				 		verificaCompatibilidade(_tipoVar);
+               	 		CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
+               	 		stack.peek().add(cmd);
+               		}
 			;
 
 
 cmdselecao  :  'se' AP
-                    ID    {
-							verificaID(_input.LT(-1).getText());
-							_exprDecision = _input.LT(-1).getText();
-							_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-						  }
-                    OPREL { _exprDecision += _input.LT(-1).getText(); }
+                    ID    		  {
+									verificaID(lastToken());
+									_exprDecision = lastToken();
+									_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+						  		  }
+                    OPREL 		  { _exprDecision += lastToken(); }
                     (ID | NUMBER) {
-						if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
-							_tipoVar.add(IsiVariable.NUMBER);
-						else {
-							verificaID(_input.LT(-1).getText());
-							_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-						}
-						_exprDecision += _input.LT(-1).getText();
-						}
-                    FP { verificaCompatibilidade(_tipoVar); }
-                    ACH
-                    {	curThread = new ArrayList<AbstractCommand>();
-                    	stack.push(curThread);
-                    }
-                    (cmd)+
-
-                    FCH
-                    {
-                    	listaTrue = stack.pop();
-                    }
-                   ('senao'
-                   	 ACH
-                   	 {
-                   	 	curThread = new ArrayList<AbstractCommand>();
-                   	 	stack.push(curThread);
-                   	 }
-                   	(cmd+)
-                   	FCH
-                   	{
-                   		listaFalse = stack.pop();
-                   		CommandDecisao cmd = new CommandDecisao(_exprDecision, listaTrue, listaFalse);
-                   		stack.peek().add(cmd);
-                   	}
-                   )?
-            ;
-
-cmdenquanto  : 'enquanto' AP
-                          
-						  ID    {
-									verificaID(_input.LT(-1).getText());
-									_exprDecision = _input.LT(-1).getText();
-									_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-								}
-						  OPREL { _exprDecision += _input.LT(-1).getText(); }
-						  (ID | NUMBER)
-						 		{
-									if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
+									if (lastToken().matches("\\d+(\\.\\d+)?"))
 										_tipoVar.add(IsiVariable.NUMBER);
 									else {
-										verificaID(_input.LT(-1).getText());
-										_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+										verificaID(lastToken());
+										_tipoVar.add(symbolTable.getTypeBy(lastToken()));
 									}
-									_exprDecision += _input.LT(-1).getText();
-								}
-						  FP 	{ verificaCompatibilidade(_tipoVar); }
-				'faca'
-                           ACH 
-                           { 
-                           	curThread = new ArrayList<AbstractCommand>();
-                           	stack.push(curThread);
-                           }
-                           (cmd)+ 
+									_exprDecision += lastToken();
+								  }
+                    FP 			  { verificaCompatibilidade(_tipoVar); }
+                    ACH			  {
+									curThread = new ArrayList<AbstractCommand>();
+                    				stack.push(curThread);
+                    			  }
+                    (cmd)+
 
-                           FCH 
-                           {
-                            listaEnq = stack.pop();
-                            CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
-                            stack.peek().add(cmd);
-                           }
+                    FCH			  { listaTrue = stack.pop(); }
+                    (
+					'senao'
+                   	ACH
+								  {
+									curThread = new ArrayList<AbstractCommand>();
+									stack.push(curThread);
+								  }
+                   	(cmd+)
+                   	FCH
+								  {
+									listaFalse = stack.pop();
+									CommandDecisao cmd = new CommandDecisao(_exprDecision, listaTrue, listaFalse);
+									stack.peek().add(cmd);
+								  }
+                    )?
+            ;
+
+cmdenquanto  : 			  'enquanto' 
+						  AP
+                          
+						  ID		    {
+									 	  verificaID(lastToken());
+										  _exprDecision = lastToken();
+										  _tipoVar.add(symbolTable.getTypeBy(lastToken()));
+										}
+						  OPREL 		{ _exprDecision += lastToken(); }
+						  (ID | NUMBER)
+						 				{
+											if (lastToken().matches("\\d+(\\.\\d+)?"))
+												_tipoVar.add(IsiVariable.NUMBER);
+											else {
+												verificaID(lastToken());
+												_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+											}
+											_exprDecision += lastToken();
+										}
+						  FP 			{ verificaCompatibilidade(_tipoVar); }
+						  'faca'
+                          ACH 
+                           				{ 
+										  curThread = new ArrayList<AbstractCommand>();
+                           				  stack.push(curThread);
+                           				}
+                          (cmd)+ 
+
+                          FCH 
+                          				{
+                            			  listaEnq = stack.pop();
+                            			  CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
+                            			  stack.peek().add(cmd);
+                           				}
 			 ;
 
 
-expr		:  termo (
-	             OP  { _exprContent += _input.LT(-1).getText();}
-	            termo
-	            )*
-			;
+expr		:  termo
+			   (
+	           OP  { _exprContent += lastToken(); }
+	           termo
+	           )*
+		    ;
 
-termo		: ID { verificaID(_input.LT(-1).getText());
-	               _tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
-				   _exprContent += _input.LT(-1).getText();
-                 }
-            |
-              NUMBER
-              {
-				_tipoVar.add(IsiVariable.NUMBER);
-              	_exprContent += _input.LT(-1).getText();
-              }
-			|
-			   CHAR
-			  {
-				_tipoVar.add(IsiVariable.CHAR);
-              	_exprContent += _input.LT(-1).getText();
-              }
-			|
-			   TEXT
-			   {
-				_tipoVar.add(IsiVariable.TEXT);
-              	_exprContent += _input.LT(-1).getText();
-               }
-			|
-			   BOOLEAN
-			   {
-				_tipoVar.add(IsiVariable.BOOLEAN);
-              	_exprContent += _input.LT(-1).getText();
-               }
+termo		: ID 	  {
+				   	   	verificaID(lastToken());
+	               	   	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+					   	_exprContent += lastToken();
+                 	  }
+            | NUMBER  {
+					   	_tipoVar.add(IsiVariable.NUMBER);
+              		    _exprContent += lastToken();
+              		  }
+			| CHAR    {
+					    _tipoVar.add(IsiVariable.CHAR);
+              		    _exprContent += lastToken();
+              		  }
+			| TEXT    {
+					    _tipoVar.add(IsiVariable.TEXT);
+              		    _exprContent += lastToken();
+               		  }
+			| BOOLEAN {
+						_tipoVar.add(IsiVariable.BOOLEAN);
+              			_exprContent += lastToken();
+               		  }
 			;
 
 

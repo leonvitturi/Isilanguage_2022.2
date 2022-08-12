@@ -8,7 +8,6 @@ package parser;
 	import ast.IsiProgram;
 	import ast.AbstractCommand;
 	import ast.CommandEnquanto;
-	//import ast.CommandEscolha;
 	import ast.CommandLeitura;
 	import ast.CommandEscrita;
 	import ast.CommandAtribuicao;

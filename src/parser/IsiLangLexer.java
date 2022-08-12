@@ -8,7 +8,6 @@ package parser;
 	import ast.IsiProgram;
 	import ast.AbstractCommand;
 	import ast.CommandEnquanto;
-	//import ast.CommandEscolha;
 	import ast.CommandLeitura;
 	import ast.CommandEscrita;
 	import ast.CommandAtribuicao;
@@ -149,6 +148,10 @@ public class IsiLangLexer extends Lexer {
 			tipos.removeAll(tipos);
 		}
 		
+		public String lastToken() {
+			return _input.LT(-1).getText();
+		}
+
 		public void exibeComandos(){
 			for (AbstractCommand c: program.getComandos()){
 				System.out.println(c);
