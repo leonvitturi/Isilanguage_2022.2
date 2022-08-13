@@ -1,4 +1,4 @@
-package src.isilanguage.ast;
+package ast;
 
 import java.util.ArrayList;
 
@@ -19,13 +19,13 @@ public class CommandDecisao extends AbstractCommand {
 		StringBuilder str = new StringBuilder();
 		str.append("if ("+condition+") {\n");
 		for (AbstractCommand cmd: listaTrue) {
-			str.append(cmd.generateJavaCode());
+			str.append("\t\t\t"+cmd.generateJavaCode());
 		}
-		str.append("}");
+		str.append("}\n");
 		if (listaFalse.size() > 0) {
-			str.append("else {\n");
+			str.append("\t\telse {\n");
 			for (AbstractCommand cmd: listaFalse) {
-				str.append(cmd.generateJavaCode());
+				str.append("\t\t\t"+cmd.generateJavaCode());
 			}
 			str.append("}\n");
 		
@@ -36,8 +36,5 @@ public class CommandDecisao extends AbstractCommand {
 	public String toString() {
 		return "CommandDecisao [condition=" + condition + ", listaTrue=" + listaTrue + ", listaFalse=" + listaFalse
 				+ "]";
-	}
-	
-	
-
+	}	
 }

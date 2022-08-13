@@ -1,4 +1,4 @@
-package src.isilanguage.ast;
+package ast;
 
 public abstract class AbstractCommand {
 

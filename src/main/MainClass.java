@@ -1,11 +1,11 @@
-package src.isilanguage.main;
+package main;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import src.isilanguage.exceptions.IsiSemanticException;
-import src.isilanguage.parser.IsiLangLexer;
-import src.isilanguage.parser.IsiLangParser;
+import exceptions.IsiSemanticException;
+import parser.IsiLangLexer;
+import parser.IsiLangParser;
 
 /* esta é a classe que é responsável por criar a interação com o usuário
  * instanciando nosso parser e apontando para o arquivo fonte

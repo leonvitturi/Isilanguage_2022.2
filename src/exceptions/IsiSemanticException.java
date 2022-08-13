@@ -1,4 +1,4 @@
-package src.isilanguage.exceptions;
+package exceptions;
 
 public class IsiSemanticException extends RuntimeException{
 	public IsiSemanticException(String msg) {
