@@ -13,7 +13,6 @@ public class CommandLeitura extends AbstractCommand {
 	}
 	@Override
 	public String generateJavaCode() {
-		// TODO Auto-generated method stub
 		switch (var.getType()) {
 			case IsiVariable.NUMBER: 
 				return id +"= _key.nextDouble();";

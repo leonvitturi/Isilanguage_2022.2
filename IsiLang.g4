@@ -26,8 +26,8 @@ grammar IsiLang;
 	private IsiProgram program = new IsiProgram();
 	private ArrayList<AbstractCommand> curThread;
 	private Stack<ArrayList<AbstractCommand>> stack = new Stack<ArrayList<AbstractCommand>>();
+	private String _opfunmat;
 	private String _readID;
-	private String _IDEscolha;
 	private String _writeID;
 	private String _exprID;
 	private String _exprContent;
@@ -203,7 +203,7 @@ cmdattrib	:  ID 	{
                SC   {
 				 		verificaCompatibilidade(_tipoVar);
                	 		CommandAtribuicao cmd = new CommandAtribuicao(_exprID, _exprContent);
-               	 		setInitialized(_readID);
+						setInitialized(_exprID);
 						stack.peek().add(cmd);
                		}
 			;
@@ -291,12 +291,61 @@ cmdenquanto  : 			  'enquanto'
 			 ;
 
 
-expr		:  termo
+expr		:  (termo|funcaomat)
 			   (
 	           OP  { _exprContent += lastToken(); }
-	           termo
+	           (termo|funcaomat)
 	           )*
 		    ;
+
+funcaomat : OPFUNCAOMAT {
+						  _opfunmat = lastToken();
+						  if (lastToken().equals("logaritmo"))
+							_exprContent += String.format("(%s", lastToken());
+						  else
+						  	_exprContent += lastToken();
+						}
+			AP 			{
+						  _exprContent += lastToken();
+						}
+			(NUMBER|ID) {
+						  if (lastToken().matches("\\d+(\\.\\d+)?"))
+						  	_tipoVar.add(IsiVariable.NUMBER);
+						  else {
+						  	verificaID(lastToken());
+							checkInitialized(lastToken());
+	               	   	  	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+						  }
+						  
+						  _exprContent += lastToken();
+						}
+			VIR		    {
+						  if (_opfunmat.equals("logaritmo")) {
+							_exprContent += ") / Math.log(";
+						  }
+						  else
+						  	_exprContent += lastToken();
+						}
+			(NUMBER|ID) {
+						  if (lastToken().matches("\\d+(\\.\\d+)?"))
+						  	_tipoVar.add(IsiVariable.NUMBER);
+						  else {
+						  	verificaID(lastToken());
+							checkInitialized(lastToken());
+						  	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+						  }
+						  
+						  if (_opfunmat.equals("raiz"))
+							_exprContent += String.format("1/%s", lastToken());
+						  else
+						    _exprContent += lastToken();
+						}
+			FP 			{
+						  if (_opfunmat.equals("logaritmo"))
+						  	_exprContent += lastToken();
+						  _exprContent += lastToken();
+						}
+			;
 
 termo		: ID 	  {
 				   	   	verificaID(lastToken());
@@ -350,8 +399,14 @@ FCH  : '}'
 OPREL : '>' | '<' | '>=' | '<=' | '==' | '!='
       ;
 
-BOOLEAN : 'true'|'false'
-      ;
+BOOLEAN : 'true'
+		| 'false'
+        ;
+
+OPFUNCAOMAT : 'potencia'
+			| 'logaritmo'
+			| 'raiz'
+		    ;
 	  
 ID	: [a-z] ([a-z] | [A-Z] | [0-9])*
 	;
@@ -364,6 +419,7 @@ TEXT : '"' ( '\\"' | . )*? '"'
 
 CHAR : '\'' ( '\\\'' | . ) '\''
      ;
+
 WS	: (' ' | '\t' | '\n' | '\r') -> skip;
 
 MLCOMMENT : ('/*' .*? '*/') -> skip;

@@ -1,5 +1,4 @@
 programa
-
   numero a, b;
   texto  t1;
   logico l;
@@ -9,6 +8,8 @@ programa
   leia(b);
   leia(c);
   
+  a = potencia(1,2) + logaritmo(2,3) + raiz(3,4);
+
   l=true;
   c='A';
   t1="PALAVRA";
