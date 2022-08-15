@@ -3,6 +3,30 @@
 //     error: '',
 //     warnings: ['abc', 'cde']
 // }
+CodeMirror.fromTextArea(document.getElementById("input"), {
+    mode: "text/x-java",
+    indentWithTabs: true,
+    smartIndent: true,
+    lineNumbers: true,
+    lineWrapping: true,
+    matchBrackets: true,
+    autofocus: true,
+    theme: "dracula",
+});
+
+CodeMirror.fromTextArea(document.getElementById("output"), {
+    mode: "text/x-java",
+    indentWithTabs: true,
+    smartIndent: true,
+    lineNumbers: true,
+    lineWrapping: true,
+    matchBrackets: true,
+    autofocus: true,
+    theme: "dracula",
+});
+
+
+
 window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("compile").addEventListener('click', async () => {
         let baseUrl = "http://localhost:8080";
