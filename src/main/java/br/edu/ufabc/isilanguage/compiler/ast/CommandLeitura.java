@@ -1,6 +1,6 @@
-package ast;
+package br.edu.ufabc.isilanguage.compiler.ast;
 
-import datastructures.IsiVariable;
+import br.edu.ufabc.isilanguage.compiler.datastructures.IsiVariable;
 
 public class CommandLeitura extends AbstractCommand {
 	

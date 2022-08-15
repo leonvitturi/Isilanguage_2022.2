@@ -43,5 +43,5 @@
 ### Compilar o parser / recognizer a partir do arquivo .g4
 
 ```shell
-java -cp .:antlr-4.7.1-complete.jar org.antlr.v4.Tool IsiLang.g4 -package parser -o ./src/parser/
+java -cp .:antlr.jar org.antlr.v4.Tool IsiLang.g4 -package br.edu.ufabc.isilanguage.compiler.parser -o ./src/main/java/br/edu/ufabc/isilanguage/compiler/parser/
 ```
