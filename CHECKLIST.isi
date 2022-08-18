@@ -1,0 +1,49 @@
+// Requisito Mínimo 6 - Aceitar números decimais
+programa
+    numero a;
+    a = 1.9999
+    escreva(a);
+fimprog;
+
+// Requisito Mínimo 7 - Verificar declaração de variáveis (não usar variáveis que não foram declaradas)
+programa
+    escreva(b);
+fimprog;
+
+// Requisito Mínimo 8 - Verificar se há variáveis declaradas e não-utilizadas (warning)
+programa
+    numero a;
+    numero b;
+    b = 2;
+    escreva(b);
+fimprog;
+
+// Requisito Mínimo 9 - Geração de pelo menos 1 linguagem destino (C/Java/Python)
+// Gera código java
+
+// Elementos Adicionais 1 - Mais tipos de dados
+programa
+    numero a;
+    texto b;
+    caractere c;
+    logico d;
+    a = 1.1;
+    b = "teste";
+    c = 'c';
+    d = true;
+
+    escreva(a);
+    escreva(b);
+    escreva(c);
+    escreva(d);
+fimprog;
+
+// Elementos Adicionais 2 - Inclusão de novos operadores (exponenciação, raiz quadrada, logaritmos)
+programa
+    numero a;
+	a = raiz(4,2) * potencia(2,3) * logaritmo(8,2);
+    escreva(a);
+fimprog;
+
+// Elementos Extraordinários 1 - Criar um editor Web para o código
+// Elementos Extraordinários 2 - Tornar o compilador um Webservice para receber programas e enviar respostas de possíveis erros
