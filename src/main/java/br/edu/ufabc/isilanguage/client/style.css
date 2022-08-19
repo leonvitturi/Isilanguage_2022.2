@@ -1,0 +1,34 @@
+body {
+    color: white;
+    font-family: Helvetica, sans-serif;
+    font-size: 15px;
+}
+#compile {
+    border: grey 1px;
+    padding: 1rem;
+    background-color: white;
+    font-weight: bold;
+    border-radius: 0.5rem;
+}
+
+#compile:hover {
+    background-color: #e7e7e7;
+}
+
+#error {
+    color: #ff5555;
+    font-weight: bold;
+    font-family: monospace;
+    height: 50px;
+    width: 100vw;
+}
+
+#warnings {
+    color: #f1fa8c;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+footer {
+    padding: 1rem;
+}

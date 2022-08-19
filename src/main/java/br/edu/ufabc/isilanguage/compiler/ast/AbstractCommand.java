@@ -1,4 +1,4 @@
-package ast;
+package br.edu.ufabc.isilanguage.compiler.ast;
 
 public abstract class AbstractCommand {
 

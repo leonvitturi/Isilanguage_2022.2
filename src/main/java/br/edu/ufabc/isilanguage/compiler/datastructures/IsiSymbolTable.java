@@ -1,4 +1,4 @@
-package datastructures;
+package br.edu.ufabc.isilanguage.compiler.datastructures;
 
 import java.util.ArrayList;
 import java.util.HashMap;

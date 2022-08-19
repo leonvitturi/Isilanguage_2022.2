@@ -1,17 +1,17 @@
 grammar IsiLang;
 
 @header{
-	import datastructures.IsiSymbol;
-	import datastructures.IsiVariable;
-	import datastructures.IsiSymbolTable;
-	import exceptions.IsiSemanticException;
-	import ast.IsiProgram;
-	import ast.AbstractCommand;
-	import ast.CommandEnquanto;
-	import ast.CommandLeitura;
-	import ast.CommandEscrita;
-	import ast.CommandAtribuicao;
-	import ast.CommandDecisao;
+	import br.edu.ufabc.isilanguage.compiler.datastructures.IsiSymbol;
+	import br.edu.ufabc.isilanguage.compiler.datastructures.IsiVariable;
+	import br.edu.ufabc.isilanguage.compiler.datastructures.IsiSymbolTable;
+	import br.edu.ufabc.isilanguage.compiler.exceptions.IsiSemanticException;
+	import br.edu.ufabc.isilanguage.compiler.ast.IsiProgram;
+	import br.edu.ufabc.isilanguage.compiler.ast.AbstractCommand;
+	import br.edu.ufabc.isilanguage.compiler.ast.CommandEnquanto;
+	import br.edu.ufabc.isilanguage.compiler.ast.CommandLeitura;
+	import br.edu.ufabc.isilanguage.compiler.ast.CommandEscrita;
+	import br.edu.ufabc.isilanguage.compiler.ast.CommandAtribuicao;
+	import br.edu.ufabc.isilanguage.compiler.ast.CommandDecisao;
 	import java.util.ArrayList;
 	import java.util.Stack;
 }
@@ -35,8 +35,8 @@ grammar IsiLang;
 	private ArrayList<AbstractCommand> listaTrue;
 	private ArrayList<AbstractCommand> listaFalse;
 	private ArrayList<AbstractCommand> listaEnq;
-	
-	
+
+
 	public void verificaID(String id){
 		if (!symbolTable.exists(id))
 			throw new IsiSemanticException("Symbol "+id+" not declared");
@@ -44,7 +44,7 @@ grammar IsiLang;
 
 	public String typeToString(int isiType) {
 		switch (isiType) {
-			case 0: 
+			case 0:
 				return "NUMBER";
 			case 1:
 				return "TEXT";
@@ -55,7 +55,7 @@ grammar IsiLang;
 			default:
 				return "";
 		}
-	} 
+	}
 
 	public void verificaCompatibilidade(ArrayList<Integer> tipos) {
 		int tipoEsq = tipos.get(0);
@@ -72,10 +72,6 @@ grammar IsiLang;
 	public void verificaAttrib(String id) {
 		if (symbolTable.exists(id) && symbolTable.get(id) == null)
 			throw new IsiSemanticException(String.format("\"%s\" has not been initialized.", id));
-	}
-	
-	public String lastToken() {
-		return _input.LT(-1).getText();
 	}
 
 	public void checkInitialized(String id) {
@@ -96,10 +92,17 @@ grammar IsiLang;
 		for (AbstractCommand c: program.getComandos())
 			System.out.println(c);
 	}
-	
-	public void generateCode(){
-		program.generateTarget();
+
+	public String generateCode(){
+		return program.generateTarget();
 	}
+
+	public ArrayList<String> getWarnings() {
+        ArrayList<String> warnings = new ArrayList<String>();
+        for(IsiSymbol s: symbolTable.getNotUsedSymbols())
+            warnings.add(String.format("Warning: Variavel <%s> foi declarada, mas nao utilizada", s.getName()));
+        return warnings;
+    }
 }
 
 prog : 'programa'
@@ -109,37 +112,37 @@ prog : 'programa'
 					program.setVarTable(symbolTable);
 					program.setComandos(stack.pop());
 					showWarningsUnusedVariables();
-				  } 
+				  }
 	 ;
-		
+
 decl    :  (declaravar)+
         ;
-        
-        
-declaravar :  tipo  ID   { 
-	                      	 _varName = lastToken();
+
+
+declaravar :  tipo  ID   {
+	                      	 _varName = _input.LT(-1).getText();
 	                      	 _varValue = null;
 	                      	 symbol = new IsiVariable(_varName, _tipo, _varValue);
 	                      	 if (!symbolTable.exists(_varName))
-	                      	    symbolTable.add(symbol);	
+	                      	    symbolTable.add(symbol);
 	                      	 else
 	                      	 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
-                         }  
+                         }
                     (
-					VIR 
+					VIR
               	    ID   {
-	                  		 _varName = lastToken();
+	                  		 _varName = _input.LT(-1).getText();
 	                  		 _varValue = null;
 	                  		 symbol = new IsiVariable(_varName, _tipo, _varValue);
 	                  		 if (!symbolTable.exists(_varName))
-	                  		    symbolTable.add(symbol);	
+	                  		    symbolTable.add(symbol);
 	                  		 else
 	                  		 	 throw new IsiSemanticException("Symbol "+_varName+" already declared");
                          }
-              	    )* 
+              	    )*
                	    SC
            ;
-           
+
 tipo       : 'numero' 	 { _tipo = IsiVariable.NUMBER;  }
            | 'texto' 	 { _tipo = IsiVariable.TEXT;  }
            | 'caractere' { _tipo = IsiVariable.CHAR;  }
@@ -159,17 +162,17 @@ cmd		:  cmdleitura
  		|  cmdattrib
  		|  cmdselecao
 		|  cmdenquanto
-		;  
+		;
 
 cmdleitura	: 'leia'
 			  AP
-			  ID { 
-					verificaID(lastToken());
-					_readID = lastToken();
+			  ID {
+					verificaID(_input.LT(-1).getText());
+					_readID = _input.LT(-1).getText();
 				 }
 			  FP
 			  SC {
-					IsiVariable var = (IsiVariable)symbolTable.get(_readID); 
+					IsiVariable var = (IsiVariable)symbolTable.get(_readID);
 					CommandLeitura cmd = new CommandLeitura(_readID, var);
 					setInitialized(_readID);
 					stack.peek().add(cmd);
@@ -179,9 +182,9 @@ cmdleitura	: 'leia'
 cmdescrita	: 'escreva'
                  AP
                  ID  {
-						verificaID(lastToken());
-	                  	_writeID = lastToken();
-						checkInitialized(_writeID);	
+						verificaID(_input.LT(-1).getText());
+	                  	_writeID = _input.LT(-1).getText();
+						checkInitialized(_writeID);
                      }
                  FP
                  SC  {
@@ -191,9 +194,9 @@ cmdescrita	: 'escreva'
 			;
 
 cmdattrib	:  ID 	{
-						verificaID(lastToken());
-						verificaAttrib(lastToken());
-                    	_exprID = lastToken();
+						verificaID(_input.LT(-1).getText());
+						verificaAttrib(_input.LT(-1).getText());
+                    	_exprID = _input.LT(-1).getText();
 						_tipoVar.add(symbolTable.getTypeBy(_exprID));
                     }
                ATTR {
@@ -211,21 +214,21 @@ cmdattrib	:  ID 	{
 
 cmdselecao  :  'se' AP
                     ID    		  {
-									verificaID(lastToken());
-									verificaAttrib(lastToken());
-									_exprDecision = lastToken();
-									_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+									verificaID(_input.LT(-1).getText());
+									verificaAttrib(_input.LT(-1).getText());
+									_exprDecision = _input.LT(-1).getText();
+									_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 						  		  }
-                    OPREL 		  { _exprDecision += lastToken(); }
+                    OPREL 		  { _exprDecision += _input.LT(-1).getText(); }
                     (ID | NUMBER) {
-									verificaAttrib(lastToken());
-									if (lastToken().matches("\\d+(\\.\\d+)?"))
+									verificaAttrib(_input.LT(-1).getText());
+									if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
 										_tipoVar.add(IsiVariable.NUMBER);
 									else {
-										verificaID(lastToken());
-										_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+										verificaID(_input.LT(-1).getText());
+										_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 									}
-									_exprDecision += lastToken();
+									_exprDecision += _input.LT(-1).getText();
 								  }
                     FP 			  { verificaCompatibilidade(_tipoVar); }
                     ACH			  {
@@ -252,37 +255,37 @@ cmdselecao  :  'se' AP
                     )?
             ;
 
-cmdenquanto  : 			  'enquanto' 
+cmdenquanto  : 			  'enquanto'
 						  AP
-                          
+
 						  ID		    {
-									 	  verificaID(lastToken());
-										  verificaAttrib(lastToken());
-										  _exprDecision = lastToken();
-										  _tipoVar.add(symbolTable.getTypeBy(lastToken()));
+									 	  verificaID(_input.LT(-1).getText());
+										  verificaAttrib(_input.LT(-1).getText());
+										  _exprDecision = _input.LT(-1).getText();
+										  _tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 										}
-						  OPREL 		{ _exprDecision += lastToken(); }
+						  OPREL 		{ _exprDecision += _input.LT(-1).getText(); }
 						  (ID | NUMBER)
 						 				{
-											verificaAttrib(lastToken());
-											if (lastToken().matches("\\d+(\\.\\d+)?"))
+											verificaAttrib(_input.LT(-1).getText());
+											if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
 												_tipoVar.add(IsiVariable.NUMBER);
 											else {
-												verificaID(lastToken());
-												_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+												verificaID(_input.LT(-1).getText());
+												_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 											}
-											_exprDecision += lastToken();
+											_exprDecision += _input.LT(-1).getText();
 										}
 						  FP 			{ verificaCompatibilidade(_tipoVar); }
 						  'faca'
-                          ACH 
-                           				{ 
+                          ACH
+                           				{
 										  curThread = new ArrayList<AbstractCommand>();
                            				  stack.push(curThread);
                            				}
-                          (cmd)+ 
+                          (cmd)+
 
-                          FCH 
+                          FCH
                           				{
                             			  listaEnq = stack.pop();
                             			  CommandEnquanto cmd = new CommandEnquanto(_exprDecision, listaEnq);
@@ -293,81 +296,81 @@ cmdenquanto  : 			  'enquanto'
 
 expr		:  (termo|funcaomat)
 			   (
-	           OP  { _exprContent += lastToken(); }
+	           OP  { _exprContent += _input.LT(-1).getText(); }
 	           (termo|funcaomat)
 	           )*
 		    ;
 
 funcaomat : OPFUNCAOMAT {
-						  _opfunmat = lastToken();
-						  if (lastToken().equals("logaritmo"))
-							_exprContent += String.format("(%s", lastToken());
+						  _opfunmat = _input.LT(-1).getText();
+						  if (_input.LT(-1).getText().equals("logaritmo"))
+							_exprContent += String.format("(%s", _input.LT(-1).getText());
 						  else
-						  	_exprContent += lastToken();
+						  	_exprContent += _input.LT(-1).getText();
 						}
 			AP 			{
-						  _exprContent += lastToken();
+						  _exprContent += _input.LT(-1).getText();
 						}
 			(NUMBER|ID) {
-						  if (lastToken().matches("\\d+(\\.\\d+)?"))
+						  if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
 						  	_tipoVar.add(IsiVariable.NUMBER);
 						  else {
-						  	verificaID(lastToken());
-							checkInitialized(lastToken());
-	               	   	  	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+						  	verificaID(_input.LT(-1).getText());
+							checkInitialized(_input.LT(-1).getText());
+	               	   	  	_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 						  }
-						  
-						  _exprContent += lastToken();
+
+						  _exprContent += _input.LT(-1).getText();
 						}
 			VIR		    {
 						  if (_opfunmat.equals("logaritmo")) {
 							_exprContent += ") / Math.log(";
 						  }
 						  else
-						  	_exprContent += lastToken();
+						  	_exprContent += _input.LT(-1).getText();
 						}
 			(NUMBER|ID) {
-						  if (lastToken().matches("\\d+(\\.\\d+)?"))
+						  if (_input.LT(-1).getText().matches("\\d+(\\.\\d+)?"))
 						  	_tipoVar.add(IsiVariable.NUMBER);
 						  else {
-						  	verificaID(lastToken());
-							checkInitialized(lastToken());
-						  	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
+						  	verificaID(_input.LT(-1).getText());
+							checkInitialized(_input.LT(-1).getText());
+						  	_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
 						  }
-						  
+
 						  if (_opfunmat.equals("raiz"))
-							_exprContent += String.format("1/%s", lastToken());
+							_exprContent += String.format("1/%s", _input.LT(-1).getText());
 						  else
-						    _exprContent += lastToken();
+						    _exprContent += _input.LT(-1).getText();
 						}
 			FP 			{
 						  if (_opfunmat.equals("logaritmo"))
-						  	_exprContent += lastToken();
-						  _exprContent += lastToken();
+						  	_exprContent += _input.LT(-1).getText();
+						  _exprContent += _input.LT(-1).getText();
 						}
 			;
 
 termo		: ID 	  {
-				   	   	verificaID(lastToken());
-						checkInitialized(lastToken());
-	               	   	_tipoVar.add(symbolTable.getTypeBy(lastToken()));
-					   	_exprContent += lastToken();
+				   	   	verificaID(_input.LT(-1).getText());
+						checkInitialized(_input.LT(-1).getText());
+	               	   	_tipoVar.add(symbolTable.getTypeBy(_input.LT(-1).getText()));
+					   	_exprContent += _input.LT(-1).getText();
                  	  }
             | NUMBER  {
 					   	_tipoVar.add(IsiVariable.NUMBER);
-              		    _exprContent += lastToken();
+              		    _exprContent += _input.LT(-1).getText();
               		  }
 			| CHAR    {
 					    _tipoVar.add(IsiVariable.CHAR);
-              		    _exprContent += lastToken();
+              		    _exprContent += _input.LT(-1).getText();
               		  }
 			| TEXT    {
 					    _tipoVar.add(IsiVariable.TEXT);
-              		    _exprContent += lastToken();
+              		    _exprContent += _input.LT(-1).getText();
                		  }
 			| BOOLEAN {
 						_tipoVar.add(IsiVariable.BOOLEAN);
-              			_exprContent += lastToken();
+              			_exprContent += _input.LT(-1).getText();
                		  }
 			;
 
@@ -407,7 +410,7 @@ OPFUNCAOMAT : 'potencia'
 			| 'logaritmo'
 			| 'raiz'
 		    ;
-	  
+
 ID	: [a-z] ([a-z] | [A-Z] | [0-9])*
 	;
 

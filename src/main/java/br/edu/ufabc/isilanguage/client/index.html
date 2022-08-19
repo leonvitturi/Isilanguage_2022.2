@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/theme/dracula.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>
+    <script src="./script.js"></script>
+    <title>Isilanguage Web Editor</title>
+</head>
+
+<body style="background-color: #4f536b">
+<h1>Isilanguage web editor</h1>
+<textarea id="input">
+programa
+    numero a;
+    escreva("a");
+fimprog;
+    </textarea>
+<br>
+<span id="error"></span>
+<span id="warnings"></span>
+<textarea id="output" style="display: none"></textarea>
+<br>
+<button id="compile">compilar</button>
+<footer>Autores: </footer>
+<ul>
+<li>Bruno Sanches Rodrigues</li>
+<li>Enzo Shiraishi Nunes da Silva</li>
+<li>Gustavo Fonseca</li>
+<li>Leonardo Vitturi Ribeiro</li>
+<li>Paloma Santana</li>
+</ul>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-package datastructures;
+package br.edu.ufabc.isilanguage.compiler.datastructures;
 
 public abstract class IsiSymbol {
 	
