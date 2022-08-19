@@ -1,9 +1,6 @@
 # Isilanguage_2022.2
 
 >❗ **ATENÇÃO** ❗
->
-> Professor, por favor veja a versão desse repositório disponível em https://github.com/eshiraishi/isilanguage, pois conta com os itens de desenvolvimento web dos elementos extraordinários.
-
 > Acesse o [editor web online](https://brusangues.github.io/isilanguage-front/)
 
 ![](./front.png)
